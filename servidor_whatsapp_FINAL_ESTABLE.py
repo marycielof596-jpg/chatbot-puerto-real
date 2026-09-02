@@ -344,6 +344,7 @@ def extraer_datos_cliente(numero):
         model="gpt-5.6-luna",
         reasoning={"effort": "none"},
         instructions="""
+
 Analiza la conversación de un posible cliente interesado en Puerto Real.
 
 Devuelve SOLO estos datos exactamente en este formato:
@@ -372,6 +373,7 @@ REGLAS:
     )
 
     return respuesta.output_text
+
 # ==========================================
 # VERIFICACIÓN DEL WEBHOOK
 # ==========================================
