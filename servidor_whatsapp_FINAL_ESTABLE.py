@@ -926,6 +926,8 @@ hilo_trabajador = threading.Thread(
 
 hilo_trabajador.start()
 
+print("TRABAJADOR DE MENSAJES INICIADO")
+
 
 # ==========================================
 # INICIAR SERVIDOR LOCAL
