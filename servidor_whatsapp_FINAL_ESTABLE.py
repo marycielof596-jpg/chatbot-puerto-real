@@ -527,7 +527,15 @@ def procesar_mensaje_cliente(
         "role": "user",
         "content": texto,
     })
+        
+    texto_conversacion = ""
 
+    for mensaje_historial in historiales[numero]:
+        texto_conversacion += (
+            f"{mensaje_historial['role']}: "
+            f"{mensaje_historial['content']}\n"
+        )
+        
     # ======================================
     # RESPUESTA DEL ASESOR IA
     # ======================================
@@ -669,14 +677,19 @@ RESPUESTAS GENERALES:
 
 No hagas una pregunta por costumbre. Pregunta solamente cuando ayude a continuar naturalmente la conversación.
 """,
-            input=historiales[numero] or [
-                {
-                    "role": "user",
-                    "content": texto
-                }
-            ],
+            input=f"""
+HISTORIAL DE LA CONVERSACIÓN:
+{texto_conversacion}
+
+MENSAJE ACTUAL DEL CLIENTE:
+{texto}
+
+Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el historial.
+""",
             max_output_tokens=600,
-            )
+        )
+
+        respuesta_texto = respuesta.output_text.strip()
 
         respuesta_texto = respuesta.output_text.strip()
 
