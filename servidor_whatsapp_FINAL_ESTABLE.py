@@ -480,7 +480,9 @@ def recibir_mensaje():
 
     ultimo_mensaje_por_numero[numero] = mensaje_id
 
-    threading.Thread(
+    print("INICIANDO PROCESAMIENTO DEL MENSAJE...")
+
+    hilo = threading.Thread(
         target=procesar_mensaje_cliente,
         args=(
             numero,
@@ -489,8 +491,12 @@ def recibir_mensaje():
             id_whatsapp,
             username,
         ),
-        daemon=True,
-    ).start()
+        daemon=False,
+    )
+
+    hilo.start()
+
+    print("HILO DE PROCESAMIENTO INICIADO")
 
     return "EVENT_RECEIVED", 200
 
@@ -507,13 +513,10 @@ def procesar_mensaje_cliente(
     id_whatsapp,
     username,
 ):
+    print("ENTRÓ A procesar_mensaje_cliente")
+
     if numero not in historiales:
         historiales[numero] = []
-
-    historiales[numero].append({
-        "role": "user",
-        "content": texto,
-    })
 
     # ======================================
     # RESPUESTA DEL ASESOR IA
