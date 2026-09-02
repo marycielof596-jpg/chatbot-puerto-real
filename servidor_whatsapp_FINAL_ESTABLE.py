@@ -669,9 +669,14 @@ RESPUESTAS GENERALES:
 
 No hagas una pregunta por costumbre. Pregunta solamente cuando ayude a continuar naturalmente la conversación.
 """,
-            input=historiales[numero],
+            input=historiales[numero] or [
+                {
+                    "role": "user",
+                    "content": texto
+                }
+            ],
             max_output_tokens=600,
-        )
+            )
 
         respuesta_texto = respuesta.output_text.strip()
 
