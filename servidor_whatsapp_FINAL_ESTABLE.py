@@ -15,7 +15,10 @@ import re
 # ==========================================
 
 app = Flask(__name__)
-client = OpenAI()
+client = OpenAI(
+    timeout=30.0,
+    max_retries=1
+)
 
 PHONE_NUMBER_ID = "1248995224968397"
 TOKEN_VERIFICACION = "puerto_real_2026"
@@ -526,7 +529,8 @@ def procesar_mensaje_cliente(
 
     try:
         respuesta = client.responses.create(
-            model="gpt-5",
+            model="gpt-5.6-luna",
+            reasoning={"effort": "none"},
             instructions=f"""
             
 Eres el asesor virtual de WhatsApp de Puerto Real, proyecto inmobiliario ubicado en Pimentel, Chiclayo.
