@@ -913,19 +913,25 @@ def trabajador_mensajes():
 
 
 # ==========================================
-# INICIAR SERVIDOR
+# INICIAR TRABAJADOR
 # ==========================================
 
+preparar_excel()
+cargar_mensajes_procesados()
+
+hilo_trabajador = threading.Thread(
+    target=trabajador_mensajes,
+    daemon=True,
+)
+
+hilo_trabajador.start()
+
+
+# ==========================================
+# INICIAR SERVIDOR LOCAL
+# ==========================================
 
 if __name__ == "__main__":
-    preparar_excel()
-    cargar_mensajes_procesados()
-
-    hilo_trabajador = threading.Thread(
-        target=trabajador_mensajes,
-        daemon=True,
-    )
-    hilo_trabajador.start()
 
     port = int(os.environ.get("PORT", 5001))
 
