@@ -523,6 +523,11 @@ def procesar_mensaje_cliente(
     if numero not in historiales:
         historiales[numero] = []
 
+        historiales[numero].append({
+        "role": "user",
+        "content": texto,
+    })
+
     # ======================================
     # RESPUESTA DEL ASESOR IA
     # ======================================
