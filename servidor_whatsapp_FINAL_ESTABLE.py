@@ -480,14 +480,17 @@ def recibir_mensaje():
 
     ultimo_mensaje_por_numero[numero] = mensaje_id
 
-    # Meta recibe 200 inmediatamente; OpenAI/Excel/WhatsApp se procesan aparte.
-    cola_mensajes.put((
-        numero,
-        texto,
-        mensaje_id,
-        id_whatsapp,
-        username,
-    ))
+    threading.Thread(
+        target=procesar_mensaje_cliente,
+        args=(
+            numero,
+            texto,
+            mensaje_id,
+            id_whatsapp,
+            username,
+        ),
+        daemon=True,
+    ).start()
 
     return "EVENT_RECEIVED", 200
 
@@ -925,8 +928,6 @@ hilo_trabajador = threading.Thread(
 )
 
 hilo_trabajador.start()
-
-print("TRABAJADOR DE MENSAJES INICIADO")
 
 
 # ==========================================
