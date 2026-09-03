@@ -1037,6 +1037,25 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
                 "¡Claro! 😊 Te muestro el diseño de la vivienda de Puerto Real 🏡"
             )
 
+                # CALIFICACIÓN AL BONO -> DERIVAR A ASESOR
+        elif any(p in texto_normalizado for p in [
+            "califico",
+            "calificar",
+            "califica",
+            "puedo calificar",
+            "puedo acceder al bono",
+            "puedo obtener el bono",
+            "si califico",
+            "si puedo obtener el bono",
+            "me pueden evaluar",
+            "evaluar para el bono",
+        ]):
+            respuesta_texto = (
+                "Para saber si calificas al Bono Techo Propio es necesario que un asesor comercial "
+                "realice la evaluación 😊 ¿Me indicas tu nombre para registrar tu solicitud?"
+            )
+
+        # PRECIO / BONO / FINANCIAMIENTO
         elif any(p in texto_normalizado for p in [
             "precio",
             "cuanto cuesta",
@@ -1049,7 +1068,6 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
                 "La inicial es de S/ 5,000 😊 Además, contamos con Bono Techo Propio "
                 "de S/ 62,700 y financiamiento hasta 48 meses sin intereses."
             )
-
         else:
             print("ENVIANDO MENSAJE A OPENAI...")
 
