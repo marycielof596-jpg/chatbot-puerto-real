@@ -587,6 +587,7 @@ def procesar_mensaje_cliente(
 
     try:
         print("ENVIANDO MENSAJE A OPENAI...")
+        print("OPENAI_API_KEY existe:", bool(os.getenv("OPENAI_API_KEY")))
 
         respuesta = client.responses.create(
             model="gpt-5.6-luna",
