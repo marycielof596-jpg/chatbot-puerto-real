@@ -21,7 +21,13 @@ client = OpenAI(
 )
 
 PHONE_NUMBER_ID = "1248995224968397"
+
+IMAGEN_UBICACION = "https://raw.githubusercontent.com/marycielof596-jpg/chatbot-puerto-real/main/PIMENTEL.png"
+
+IMAGEN_CASA = "https://raw.githubusercontent.com/marycielof596-jpg/chatbot-puerto-real/main/CASA%20PUERTO%20REAL%202026.jpeg"
+
 TOKEN_VERIFICACION = "puerto_real_2026"
+
 ARCHIVO_EXCEL = "clientes_puerto_real.xlsx"
 
 
@@ -510,6 +516,45 @@ def recibir_mensaje():
 # PROCESAR MENSAJE DEL CLIENTE
 # ==========================================
 
+def enviar_imagen_whatsapp(numero, url_imagen, descripcion):
+
+    token_whatsapp_actual = os.getenv("WHATSAPP_TOKEN")
+
+    if not token_whatsapp_actual:
+        print("WHATSAPP_TOKEN no está configurado.")
+        return
+
+    url = f"https://graph.facebook.com/v26.0/{PHONE_NUMBER_ID}/messages"
+
+    headers = {
+        "Authorization": f"Bearer {token_whatsapp_actual}",
+        "Content-Type": "application/json",
+    }
+
+    payload = {
+        "messaging_product": "whatsapp",
+        "type": "image",
+        "image": {
+            "link": url_imagen,
+            "caption": descripcion,
+        },
+    }
+
+    if "." in str(numero):
+        payload["recipient"] = numero
+    else:
+        payload["to"] = numero
+
+    respuesta = requests.post(
+        url,
+        headers=headers,
+        json=payload,
+        timeout=30,
+    )
+
+    print("RESPUESTA IMAGEN WHATSAPP:")
+    print(respuesta.status_code)
+    print(respuesta.text)
 
 def procesar_mensaje_cliente(
     numero,
@@ -523,7 +568,7 @@ def procesar_mensaje_cliente(
     if numero not in historiales:
         historiales[numero] = []
 
-        historiales[numero].append({
+    historiales[numero].append({
         "role": "user",
         "content": texto,
     })
@@ -535,7 +580,7 @@ def procesar_mensaje_cliente(
             f"{mensaje_historial['role']}: "
             f"{mensaje_historial['content']}\n"
         )
-        
+
     # ======================================
     # RESPUESTA DEL ASESOR IA
     # ======================================
@@ -663,6 +708,46 @@ UBICACIÓN Y UBICACIONES:
   confirma brevemente que la solicitud quedó registrada.
 
 - NO ofrezcas mapas, dirección exacta, Google Maps ni enlaces de ubicación si esa información no está confirmada.
+
+CONTEXTO DEL PROYECTO PUERTO REAL:
+
+HECHOS CONFIRMADOS:
+- Puerto Real ofrece viviendas de interés social.
+- Son casas de 2 pisos.
+- El proyecto trabaja con el Bono Techo Propio de S/ 62,700.
+- La entrega está proyectada en 30 meses.
+- Actualmente se está por iniciar la construcción de la casa piloto.
+
+CONTEXTO INTERNO PARA ENTENDER EL PROCESO:
+- Al trabajar con Techo Propio y con procesos vinculados al Estado, la documentación, planificación y desarrollo son más rigurosos y toman más tiempo.
+- El proyecto debe avanzar por etapas antes de construir todas las viviendas.
+- Existe un proceso relacionado con alcanzar un porcentaje de interesados y gestionar los códigos correspondientes de Techo Propio.
+- La vigencia del bono considerada para este proceso es de 1 año.
+
+MUY IMPORTANTE:
+- Esta parte es SOLO contexto interno.
+- NO expliques al cliente porcentajes, códigos, trámites, vigencia del bono ni procesos administrativos salvo que expresamente sea necesario.
+- NO inventes porcentajes, fechas, códigos ni avances.
+- NO digas que todas las casas ya están construidas.
+- NO digas que todas las casas ya están en construcción.
+- NO asegures que una persona ya tiene aprobado el bono.
+
+CÓMO RESPONDER AL CLIENTE:
+
+Si pregunta si ya están construyendo:
+"Actualmente estamos próximos a iniciar la construcción de la casa piloto de Puerto Real 🏡. El proyecto continuará avanzando por etapas hasta la entrega de las viviendas."
+
+Si pregunta por qué la entrega es en 30 meses:
+"Puerto Real es un proyecto de vivienda de interés social que trabaja con Techo Propio 🏡. Por eso, la documentación, planificación y desarrollo avanzan por etapas. La entrega de las viviendas está proyectada en 30 meses 😊"
+
+Si pregunta por qué todavía no están todas las casas construidas:
+"El proyecto se desarrolla por etapas porque primero deben completarse procesos de documentación y planificación propios de este tipo de vivienda. Actualmente estamos próximos a iniciar la casa piloto 🏡"
+
+REGLA GENERAL:
+- Explica de manera sencilla, transparente y comercial.
+- No abrumes al cliente con detalles técnicos.
+- Si la pregunta requiere información más específica sobre trámites, códigos o avance actual, ofrece que un asesor comercial lo confirme.
+
 RESPUESTAS GENERALES:
 - Si solamente dice "Hola": responde de forma breve y amable.
   Ejemplo: "¡Hola! 😊 Soy el asesor virtual de Puerto Real 🏡 ¿En qué puedo ayudarte?"
@@ -690,8 +775,33 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
         )
 
         respuesta_texto = respuesta.output_text.strip()
+        texto_minuscula = texto.lower()
 
-        respuesta_texto = respuesta.output_text.strip()
+        if (
+            "casa" in texto_minuscula
+            or "vivienda" in texto_minuscula
+            or "fachada" in texto_minuscula
+            or "como es" in texto_minuscula
+            or "cómo es" in texto_minuscula
+        ):
+            enviar_imagen_whatsapp(
+                numero,
+                IMAGEN_CASA,
+                "Así es la vivienda de Puerto Real 🏡"
+            )
+
+        elif (
+            "ubicacion" in texto_minuscula
+            or "ubicación" in texto_minuscula
+            or "donde queda" in texto_minuscula
+            or "dónde queda" in texto_minuscula
+            or "pimentel" in texto_minuscula
+        ):
+            enviar_imagen_whatsapp(
+                numero,
+                IMAGEN_UBICACION,
+                "Puerto Real está ubicado en Pimentel, Chiclayo 📍"
+            )
 
         # ======================================
         # RESPALDO SI OPENAI DEVUELVE VACÍO
