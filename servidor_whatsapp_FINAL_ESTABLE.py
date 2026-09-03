@@ -773,7 +773,7 @@ MENSAJE ACTUAL DEL CLIENTE:
 
 Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el historial.
 """,
-        max_output_tokens=600,
+        max_output_tokens=150,
     )
 
         print("OPENAI RESPONDIÓ")
