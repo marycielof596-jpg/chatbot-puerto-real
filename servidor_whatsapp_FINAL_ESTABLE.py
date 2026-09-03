@@ -609,20 +609,29 @@ def enviar_imagen_whatsapp(numero, url_imagen, descripcion):
 
 
 def enviar_texto_whatsapp(numero, texto_respuesta):
+    print("PREPARANDO ENVÍO A WHATSAPP...", flush=True)
+
     token_whatsapp_actual = os.getenv("WHATSAPP_TOKEN")
+
     if not token_whatsapp_actual:
-        print("WHATSAPP_TOKEN no está configurado.")
+        print("ERROR: WHATSAPP_TOKEN no está configurado.", flush=True)
         return False
 
+    print("WHATSAPP_TOKEN encontrado.", flush=True)
+
     url = f"https://graph.facebook.com/v26.0/{PHONE_NUMBER_ID}/messages"
+
     headers = {
         "Authorization": f"Bearer {token_whatsapp_actual}",
         "Content-Type": "application/json",
     }
+
     payload = {
         "messaging_product": "whatsapp",
         "type": "text",
-        "text": {"body": texto_respuesta},
+        "text": {
+            "body": texto_respuesta
+        },
     }
 
     if "." in str(numero):
@@ -630,17 +639,45 @@ def enviar_texto_whatsapp(numero, texto_respuesta):
     else:
         payload["to"] = numero
 
+    print("ENVIANDO RESPUESTA A WHATSAPP...", flush=True)
+    print("DESTINATARIO:", numero, flush=True)
+
     try:
         envio = requests.post(
-            url, headers=headers, json=payload, timeout=(10, 20)
+            url,
+            headers=headers,
+            json=payload,
+            timeout=(5, 10)
         )
-        print("RESPUESTA DE WHATSAPP:", envio.status_code)
-        print(envio.text)
+
+        print(
+            "RESPUESTA DE WHATSAPP:",
+            envio.status_code,
+            flush=True
+        )
+
+        print(
+            "DETALLE WHATSAPP:",
+            envio.text,
+            flush=True
+        )
+
         return envio.status_code == 200
-    except requests.RequestException as error:
-        print("ERROR ENVIANDO A WHATSAPP:", error)
+
+    except requests.Timeout:
+        print(
+            "ERROR: WhatsApp tardó demasiado en responder.",
+            flush=True
+        )
         return False
 
+    except requests.RequestException as error:
+        print(
+            "ERROR ENVIANDO A WHATSAPP:",
+            error,
+            flush=True
+        )
+        return False
 
 def detectar_imagen_para_mensaje(texto):
     t = texto.lower().strip()
