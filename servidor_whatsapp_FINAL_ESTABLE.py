@@ -773,6 +773,25 @@ def enviar_texto_whatsapp(numero, texto_respuesta):
 def detectar_imagen_para_mensaje(texto):
     t = texto.lower().strip()
 
+    # 1) VARIAS UBICACIONES / ZONAS / PROYECTOS
+    palabras_ubicaciones = [
+        "ubicaciones",
+        "que ubicaciones",
+        "qué ubicaciones",
+        "tienen ubicaciones",
+        "zonas",
+        "lugares",
+        "proyectos",
+        "donde tienen proyectos",
+        "dónde tienen proyectos",
+        "en que zonas",
+        "en qué zonas",
+    ]
+
+    if any(p in t for p in palabras_ubicaciones):
+        return None
+
+    # 2) UBICACIÓN DE PUERTO REAL
     palabras_ubicacion = [
         "ubicacion",
         "ubicación",
@@ -784,11 +803,6 @@ def detectar_imagen_para_mensaje(texto):
         "dónde está",
         "ubicado",
         "ubicada",
-        "ubicacion del proyecto",
-        "ubicación del proyecto",
-        "donde queda el proyecto",
-        "dónde queda el proyecto",
-        "proyecto",
         "pimentel",
     ]
 
@@ -798,10 +812,18 @@ def detectar_imagen_para_mensaje(texto):
             "Ubicación del proyecto Puerto Real en Pimentel 📍",
         )
 
-    palabras_avance = ["constru", "avance", "piloto", "obra"]
+    # 3) AVANCE / CONSTRUCCIÓN
+    palabras_avance = [
+        "constru",
+        "avance",
+        "piloto",
+        "obra",
+    ]
+
     if any(p in t for p in palabras_avance):
         return None
 
+    # 4) CASA / FOTO
     palabras_casa = [
         "casa",
         "vivienda",
@@ -1009,6 +1031,24 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
                 "¿Qué te gustaría conocer: ubicación, características de la casa o facilidades de compra?"
             )
 
+        elif any(p in texto_normalizado for p in [
+            "ubicaciones",
+            "que ubicaciones",
+            "qué ubicaciones",
+            "tienen ubicaciones",
+            "zonas",
+            "lugares",
+            "donde tienen proyectos",
+            "dónde tienen proyectos",
+            "en que zonas",
+            "en qué zonas",
+        ]):
+            respuesta_texto = (
+                "Sí contamos con información sobre nuestras ubicaciones y proyectos 😊 "
+                "Un asesor comercial puede detallártelas mejor. "
+                "¿Me indicas tu nombre para registrar tu solicitud?"
+            )  
+                    
         elif any(p in texto_normalizado for p in [
             "donde queda",
             "dónde queda",
