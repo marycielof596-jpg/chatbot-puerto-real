@@ -25,6 +25,8 @@ TOKEN_VERIFICACION = "puerto_real_2026"
 
 ARCHIVO_EXCEL = "clientes_puerto_real.xlsx"
 
+GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbzHz2y9zxN9K8x7zHNPzgZpIeAkAga4Lrz5IHDbizPBFBiEWh7MP5S1kP9b1DIyM5Q4/exec"
+
 
 # ==========================================
 # MEMORIA DE CONVERSACIONES
@@ -293,6 +295,58 @@ def guardar_cliente_excel(
         print("CLIENTE GUARDADO EN EXCEL")
 
     libro.save(ARCHIVO_EXCEL)
+def guardar_cliente_google_sheets(
+    nombre,
+    whatsapp,
+    id_whatsapp,
+    username,
+    motivo_compra,
+    numero_personas,
+    inicial,
+    bono,
+    ubicacion,
+    financiamiento,
+    solicitud_asesor,
+    horario_contacto,
+    nivel_lead,
+    resumen,
+):
+    try:
+        ahora = datetime.now()
+
+        datos = {
+            "fecha": ahora.strftime("%d/%m/%Y"),
+            "hora": ahora.strftime("%H:%M:%S"),
+            "nombre": nombre,
+            "whatsapp": whatsapp,
+            "id_whatsapp": id_whatsapp,
+            "username": username,
+            "motivo_compra": motivo_compra,
+            "numero_personas": numero_personas,
+            "inicial": inicial,
+            "bono": bono,
+            "ubicacion": ubicacion,
+            "financiamiento": financiamiento,
+            "solicitud_asesor": solicitud_asesor,
+            "horario_contacto": horario_contacto,
+            "nivel_lead": nivel_lead,
+            "resumen": resumen,
+        }
+
+        respuesta = requests.post(
+            GOOGLE_SHEETS_URL,
+            json=datos,
+            timeout=(5, 15),
+        )
+
+        print("GOOGLE SHEETS STATUS:", respuesta.status_code, flush=True)
+        print("GOOGLE SHEETS RESPUESTA:", respuesta.text, flush=True)
+
+        return respuesta.status_code == 200
+
+    except Exception as error:
+        print("ERROR GUARDANDO EN GOOGLE SHEETS:", error, flush=True)
+        return False
 
 
 # ==========================================
@@ -1173,6 +1227,23 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
             datos_cliente["Nivel del lead"],
             datos_cliente["Resumen"],
         )
+
+        guardar_cliente_google_sheets(
+    datos_cliente["Nombre"],
+    whatsapp_para_excel,
+    id_whatsapp,
+    username,
+    datos_cliente["Motivo de compra"],
+    datos_cliente["Número de personas"],
+    datos_cliente["Inicial"],
+    datos_cliente["Bono"],
+    datos_cliente["Ubicación"],
+    datos_cliente["Financiamiento"],
+    datos_cliente["Solicitud de asesor"],
+    datos_cliente["Horario de contacto"],
+    datos_cliente["Nivel del lead"],
+    datos_cliente["Resumen"],
+)
         print("CLIENTE PROCESADO EN CRM")
     except Exception as error:
         print("ERROR GUARDANDO CLIENTE:", error)
