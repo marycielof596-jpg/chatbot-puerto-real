@@ -539,15 +539,23 @@ def recibir_mensaje():
 
     ultimo_mensaje_por_numero[numero] = mensaje_id
 
-    print("MENSAJE ENVIADO A LA COLA DE PROCESAMIENTO")
+    print("INICIANDO PROCESAMIENTO DEL MENSAJE...")
 
-    cola_mensajes.put((
-        numero,
-        texto,
-        mensaje_id,
-        id_whatsapp,
-        username,
-    ))
+    hilo = threading.Thread(
+        target=procesar_mensaje_cliente,
+        args=(
+            numero,
+            texto,
+            mensaje_id,
+            id_whatsapp,
+            username,
+        ),
+        daemon=False,
+    )
+
+    hilo.start()
+
+    print("HILO DE PROCESAMIENTO INICIADO")
 
     return "EVENT_RECEIVED", 200
 
