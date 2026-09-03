@@ -17,9 +17,9 @@ app = Flask(__name__)
 
 PHONE_NUMBER_ID = "1248995224968397"
 
-IMAGEN_UBICACION = "https://raw.githubusercontent.com/marycielof596-jpg/chatbot-puerto-real/main/PIMENTEL.png"
+IMAGEN_UBICACION = "PIMENTEL.png"
 
-IMAGEN_CASA = "https://raw.githubusercontent.com/marycielof596-jpg/chatbot-puerto-real/main/CASA%20PUERTO%20REAL%202026.jpeg"
+IMAGEN_CASA = "CASA PUERTO REAL 2026.jpeg"
 
 TOKEN_VERIFICACION = "puerto_real_2026"
 
@@ -572,40 +572,130 @@ def recibir_mensaje():
 # PROCESAR MENSAJE DEL CLIENTE
 # ==========================================
 
-def enviar_imagen_whatsapp(numero, url_imagen, descripcion):
+def enviar_imagen_whatsapp(numero, ruta_imagen, descripcion):
     token_whatsapp_actual = os.getenv("WHATSAPP_TOKEN")
+
     if not token_whatsapp_actual:
-        print("WHATSAPP_TOKEN no está configurado.")
+        print("WHATSAPP_TOKEN no está configurado.", flush=True)
         return False
 
-    url = f"https://graph.facebook.com/v26.0/{PHONE_NUMBER_ID}/messages"
-    headers = {
-        "Authorization": f"Bearer {token_whatsapp_actual}",
-        "Content-Type": "application/json",
-    }
-    payload = {
-        "messaging_product": "whatsapp",
-        "type": "image",
-        "image": {
-            "link": url_imagen,
-            "caption": descripcion,
-        },
-    }
+    print("PREPARANDO IMAGEN:", ruta_imagen, flush=True)
 
-    if "." in str(numero):
-        payload["recipient"] = numero
+    # Detectar tipo de imagen
+    if ruta_imagen.lower().endswith(".png"):
+        mime_type = "image/png"
+
+    elif ruta_imagen.lower().endswith(".jpg") or ruta_imagen.lower().endswith(".jpeg"):
+        mime_type = "image/jpeg"
+
     else:
-        payload["to"] = numero
+        print("FORMATO DE IMAGEN NO SOPORTADO", flush=True)
+        return False
+
+    # ==========================================
+    # 1. SUBIR IMAGEN A META
+    # ==========================================
+
+    url_media = f"https://graph.facebook.com/v26.0/{PHONE_NUMBER_ID}/media"
+
+    headers = {
+        "Authorization": f"Bearer {token_whatsapp_actual}"
+    }
 
     try:
-        respuesta = requests.post(
-            url, headers=headers, json=payload, timeout=(10, 20)
+        with open(ruta_imagen, "rb") as archivo:
+
+            files = {
+                "file": (
+                    os.path.basename(ruta_imagen),
+                    archivo,
+                    mime_type
+                )
+            }
+
+            data = {
+                "messaging_product": "whatsapp"
+            }
+
+            subida = requests.post(
+                url_media,
+                headers=headers,
+                files=files,
+                data=data,
+                timeout=(5, 20)
+            )
+
+        print("SUBIDA IMAGEN:", subida.status_code, flush=True)
+        print(subida.text, flush=True)
+
+        if subida.status_code != 200:
+            return False
+
+        media_id = subida.json().get("id")
+
+        if not media_id:
+            print("NO SE RECIBIÓ MEDIA ID", flush=True)
+            return False
+
+        # ==========================================
+        # 2. ENVIAR IMAGEN POR WHATSAPP
+        # ==========================================
+
+        url_mensaje = (
+            f"https://graph.facebook.com/v26.0/"
+            f"{PHONE_NUMBER_ID}/messages"
         )
-        print("RESPUESTA IMAGEN WHATSAPP:", respuesta.status_code)
-        print(respuesta.text)
-        return respuesta.status_code == 200
-    except requests.RequestException as error:
-        print("ERROR ENVIANDO IMAGEN A WHATSAPP:", error)
+
+        headers_mensaje = {
+            "Authorization": f"Bearer {token_whatsapp_actual}",
+            "Content-Type": "application/json",
+        }
+
+        payload = {
+            "messaging_product": "whatsapp",
+            "type": "image",
+            "image": {
+                "id": media_id,
+                "caption": descripcion
+            }
+        }
+
+        if "." in str(numero):
+            payload["recipient"] = numero
+        else:
+            payload["to"] = numero
+
+        envio = requests.post(
+            url_mensaje,
+            headers=headers_mensaje,
+            json=payload,
+            timeout=(5, 20)
+        )
+
+        print(
+            "RESPUESTA IMAGEN WHATSAPP:",
+            envio.status_code,
+            flush=True
+        )
+
+        print(envio.text, flush=True)
+
+        return envio.status_code == 200
+
+    except FileNotFoundError:
+        print(
+            "ERROR: No se encontró la imagen:",
+            ruta_imagen,
+            flush=True
+        )
+        return False
+
+    except Exception as error:
+        print(
+            "ERROR ENVIANDO IMAGEN:",
+            error,
+            flush=True
+        )
         return False
 
 
