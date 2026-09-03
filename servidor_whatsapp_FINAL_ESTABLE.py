@@ -843,13 +843,86 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
 """
 
     try:
-        print("ENVIANDO MENSAJE A OPENAI...")
-        respuesta_texto = llamar_openai_responses(
-            instructions=instructions,
-            input_text=input_actual,
-            max_output_tokens=220,
-        )
-        print("OPENAI RESPONDIÓ")
+        texto_normalizado = texto.lower().strip()
+
+        if texto_normalizado in [
+            "hola",
+            "holaa",
+            "buenas",
+            "buenos dias",
+            "buenas tardes",
+        ]:
+            respuesta_texto = (
+                "¡Hola! 😊 Soy el asesor virtual de Puerto Real 🏡 "
+                "¿En qué puedo ayudarte?"
+            )
+
+        elif any(p in texto_normalizado for p in [
+            "quiero informacion",
+            "quiero información",
+            "mas informacion",
+            "más información",
+            "quiero mas informacion",
+            "quiero más información",
+            "informes",
+        ]):
+            respuesta_texto = (
+                "¡Claro! 😊 Te ayudo con Puerto Real 🏡 "
+                "¿Qué te gustaría conocer: ubicación, características de la casa o facilidades de compra?"
+            )
+
+        elif any(p in texto_normalizado for p in [
+            "donde queda",
+            "dónde queda",
+            "ubicacion",
+            "ubicación",
+            "donde esta ubicado",
+            "dónde está ubicado",
+            "donde está",
+            "dónde está",
+        ]):
+            respuesta_texto = (
+                "Puerto Real está ubicado en Pimentel, Chiclayo 😊📍"
+            )
+
+        elif any(p in texto_normalizado for p in [
+            "foto",
+            "fotos",
+            "imagen",
+            "imagenes",
+            "imágenes",
+            "fachada",
+            "mostrar la casa",
+            "ver la casa",
+        ]):
+            respuesta_texto = (
+                "¡Claro! 😊 Te muestro el diseño de la vivienda de Puerto Real 🏡"
+            )
+
+        elif any(p in texto_normalizado for p in [
+            "precio",
+            "cuanto cuesta",
+            "cuánto cuesta",
+            "inicial",
+            "bono",
+            "financiamiento",
+        ]):
+            respuesta_texto = (
+                "La inicial es de S/ 5,000 😊 Además, contamos con Bono Techo Propio "
+                "de S/ 62,700 y financiamiento hasta 48 meses sin intereses."
+            )
+
+        else:
+            print("ENVIANDO MENSAJE A OPENAI...")
+
+            respuesta_texto = llamar_openai_responses(
+                instructions=instructions,
+                input_text=input_actual,
+                max_output_tokens=220,
+            )
+
+            print("OPENAI RESPONDIÓ")
+
     except Exception as error:
         print("ERROR DE OPENAI:", error)
         respuesta_texto = (
