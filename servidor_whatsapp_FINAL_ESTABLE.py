@@ -645,30 +645,44 @@ def enviar_texto_whatsapp(numero, texto_respuesta):
 def detectar_imagen_para_mensaje(texto):
     t = texto.lower().strip()
 
+    # 1) Si preguntan por VARIAS ubicaciones, no mandar imagen automática
+    palabras_ubicaciones = [
+        "ubicaciones", "zonas", "lugares", "proyectos", "que ubicaciones",
+        "qué ubicaciones", "donde tienen proyectos", "dónde tienen proyectos"
+    ]
+    if any(p in t for p in palabras_ubicaciones):
+        return None
+
+    # 2) Si preguntan por ubicación puntual de Puerto Real, mandar imagen de Pimentel
     palabras_ubicacion = [
         "ubicacion", "ubicación", "donde queda", "dónde queda",
-        "donde esta", "dónde está", "ubicado", "ubicada", "pimentel",
+        "donde esta", "dónde está", "ubicado", "ubicada",
+        "pimentel", "localizacion", "localización"
     ]
     if any(p in t for p in palabras_ubicacion):
         return (
             IMAGEN_UBICACION,
-            "Puerto Real está ubicado en Pimentel, Chiclayo 📍",
+            "Puerto Real está ubicado en Pimentel, Chiclayo 📍"
         )
 
-    # Si pregunta por avance/construcción, no mandamos el render para no dar
-    # la impresión de que esa vivienda ya está construida.
-    palabras_avance = ["constru", "avance", "piloto", "obra"]
+    # 3) Si preguntan por avance / construcción, no mandar render de la casa
+    palabras_avance = [
+        "constru", "avance", "piloto", "obra", "construido",
+        "construccion", "construcción"
+    ]
     if any(p in t for p in palabras_avance):
         return None
 
+    # 4) Si preguntan por la casa, sí mandar imagen de la casa
     palabras_casa = [
-        "casa", "vivienda", "fachada", "como es", "cómo es",
-        "foto", "fotos", "imagen", "imagenes", "imágenes",
+        "casa", "casa de dos pisos", "vivienda", "fachada",
+        "como es", "cómo es", "foto", "fotos",
+        "imagen", "imagenes", "imágenes", "render"
     ]
     if any(p in t for p in palabras_casa):
         return (
             IMAGEN_CASA,
-            "Así es el diseño de la vivienda de Puerto Real 🏡",
+            "Así es el diseño referencial de la vivienda de Puerto Real 🏡"
         )
 
     return None
@@ -780,6 +794,36 @@ REGLAS SOBRE ESTE CONTEXTO:
 - No asegures que una persona ya tiene aprobado el bono.
 - Si preguntan si ya están construyendo, explica brevemente que están próximos a iniciar la casa piloto y que el proyecto avanzará por etapas.
 - Si preguntan por qué son 30 meses, explica de forma sencilla que por tratarse de vivienda de interés social con Techo Propio, la documentación, planificación y desarrollo avanzan por etapas.
+
+INFORMACIÓN GENERAL:
+- Si el cliente dice "quiero información", "más información", "informes", "quiero saber más" o algo similar, NO envíes toda la información del proyecto de golpe.
+- Responde breve y de forma natural.
+- Ejemplo:
+  "¡Claro! 😊 Te ayudo con Puerto Real 🏡 ¿Qué te gustaría conocer: ubicación, características de la casa o facilidades de compra?"
+- Después responde únicamente sobre el tema que el cliente elija.
+
+RESPUESTAS ESPECÍFICAS:
+- Si el cliente pregunta por ubicación, responde solo la ubicación.
+- Si pregunta por precio, inicial, bono, cuotas o financiamiento, responde solo la información económica.
+- Si pregunta por la casa, fachada o cómo es la vivienda, responde solo sobre la vivienda.
+- No mezcles ubicación, precio y características en una sola respuesta si no lo pidió.
+
+IMÁGENES:
+- El sistema SÍ puede enviar imágenes.
+- Nunca digas "no puedo enviar fotos" o "no puedo enviar imágenes".
+- Si el cliente pide una foto, imagen, fachada o pregunta cómo es la vivienda, responde brevemente:
+  "¡Claro! 😊 Te muestro el diseño de la vivienda de Puerto Real 🏡"
+- Después del texto, el sistema enviará automáticamente la imagen de la casa.
+- Si el cliente pregunta por ubicación, dónde queda o dónde está ubicado Puerto Real, responde:
+  "Puerto Real está ubicado en Pimentel, Chiclayo 😊📍"
+- Después del texto, el sistema enviará automáticamente la imagen de Pimentel.
+- No digas que la imagen ya demuestra avance de obra o construcción terminada.
+
+PRECIO Y FACILIDADES:
+- Si el cliente pregunta por "precio", "precios", "cuánto cuesta", "inicial", "bono", "cuotas" o "financiamiento", responde únicamente con la información económica confirmada.
+- Puedes responder:
+  "La inicial es de S/ 5,000 😊 Además, contamos con Bono Techo Propio de S/ 62,700 y financiamiento hasta 48 meses sin intereses."
+- Si pregunta por un precio final exacto que no está confirmado en la base de conocimiento, indica brevemente que un asesor comercial puede confirmarlo.
 
 MUY IMPORTANTE:
 - NO inventes precios, disponibilidad, promociones, requisitos, fórmulas ni fechas.
