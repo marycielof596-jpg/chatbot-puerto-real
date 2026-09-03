@@ -16,8 +16,8 @@ import re
 
 app = Flask(__name__)
 client = OpenAI(
-    timeout=30.0,
-    max_retries=1
+    timeout=15.0,
+    max_retries=0
 )
 
 PHONE_NUMBER_ID = "1248995224968397"
