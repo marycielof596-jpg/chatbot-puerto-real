@@ -480,6 +480,7 @@ def recibir_mensaje():
     # Meta envía eventos de enviado, entregado, leído, etc.
     # No son mensajes del cliente y se ignoran silenciosamente.
     if "statuses" in value:
+        print("ESTADO DE WHATSAPP:", value["statuses"], flush=True)
         return "EVENT_RECEIVED", 200
 
     mensajes = value.get("messages")
