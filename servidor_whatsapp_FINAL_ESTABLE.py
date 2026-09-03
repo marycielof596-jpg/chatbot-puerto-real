@@ -586,6 +586,8 @@ def procesar_mensaje_cliente(
     # ======================================
 
     try:
+        print("ENVIANDO MENSAJE A OPENAI...")
+
         respuesta = client.responses.create(
             model="gpt-5.6-luna",
             reasoning={"effort": "none"},
@@ -762,7 +764,7 @@ RESPUESTAS GENERALES:
 
 No hagas una pregunta por costumbre. Pregunta solamente cuando ayude a continuar naturalmente la conversación.
 """,
-            input=f"""
+        input=f"""
 HISTORIAL DE LA CONVERSACIÓN:
 {texto_conversacion}
 
@@ -771,8 +773,10 @@ MENSAJE ACTUAL DEL CLIENTE:
 
 Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el historial.
 """,
-            max_output_tokens=600,
-        )
+        max_output_tokens=600,
+    )
+
+        print("OPENAI RESPONDIÓ")
 
         respuesta_texto = respuesta.output_text.strip()
         texto_minuscula = texto.lower()
@@ -811,7 +815,6 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
 
             texto_normalizado = texto.lower().strip()
 
-            # VARIAS UBICACIONES / ZONAS
             if any(palabra in texto_normalizado for palabra in [
                 "ubicaciones",
                 "qué ubicaciones",
@@ -827,7 +830,6 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
                     "¿Me indicas tu nombre para registrar tu solicitud?"
                 )
 
-            # UBICACIÓN DE PUERTO REAL
             elif any(palabra in texto_normalizado for palabra in [
                 "donde queda",
                 "dónde queda",
@@ -840,19 +842,16 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
                     "Puerto Real está ubicado en Pimentel, Chiclayo 😊🏡"
                 )
 
-            # INICIAL
             elif "inicial" in texto_normalizado:
                 respuesta_texto = (
                     "La inicial para Puerto Real es de S/ 5,000 😊"
                 )
 
-            # BONO
             elif "bono" in texto_normalizado:
                 respuesta_texto = (
                     "Puerto Real cuenta con el Bono Techo Propio de S/ 62,700 🏡✨"
                 )
 
-            # FINANCIAMIENTO
             elif any(palabra in texto_normalizado for palabra in [
                 "financiamiento",
                 "financiar",
@@ -863,7 +862,6 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
                     "Tenemos financiamiento hasta 48 meses sin intereses 😊"
                 )
 
-            # HABITACIONES
             elif any(palabra in texto_normalizado for palabra in [
                 "habitaciones",
                 "habitacion",
@@ -875,14 +873,12 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
                     "Las casas cuentan con 3 habitaciones y 2 baños 🏡"
                 )
 
-            # ASESOR
             elif "asesor" in texto_normalizado:
                 respuesta_texto = (
                     "¡Claro! 😊 Ya tengo registrada tu solicitud. "
                     "El equipo comercial podrá contactarte en el horario indicado."
                 )
 
-            # PRECIO
             elif any(palabra in texto_normalizado for palabra in [
                 "precio",
                 "costo",
@@ -894,7 +890,6 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
                     "Puedo registrar tu consulta para que un asesor te lo confirme."
                 )
 
-            # CIERRE / CONFIRMACIÓN
             elif texto_normalizado in [
                 "ok",
                 "okey",
@@ -911,13 +906,11 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
                     "tu solicitud ya puede quedar registrada."
                 )
 
-            # MENSAJE SOLO CON SIGNOS
             elif texto_normalizado in ["?", "??", "???"]:
                 respuesta_texto = (
                     "Aquí estoy 😊 Si quieres, puedo ayudarte con alguna duda de Puerto Real."
                 )
 
-            # RESPUESTA GENERAL
             else:
                 respuesta_texto = (
                     "¡Claro! 😊 Dime qué deseas saber sobre Puerto Real."
@@ -925,7 +918,7 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
 
     except Exception as error:
         print("ERROR DE OPENAI:", error)
-        return        
+        return      
 
     # ======================================
     # GUARDAR RESPUESTA EN MEMORIA
