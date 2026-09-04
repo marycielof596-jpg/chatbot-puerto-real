@@ -1,6 +1,7 @@
 from flask import Flask, request
 from openpyxl import load_workbook, Workbook
 from datetime import datetime
+from zoneinfo import ZoneInfo
 import requests
 import os
 import threading
@@ -310,7 +311,7 @@ def guardar_cliente_google_sheets(
     resumen,
 ):
     try:
-        ahora = datetime.now()
+        ahora = datetime.now(ZoneInfo("America/Lima"))
 
         datos = {
             "fecha": ahora.strftime("%d/%m/%Y"),
