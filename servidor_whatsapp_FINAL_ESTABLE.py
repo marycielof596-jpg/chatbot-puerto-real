@@ -109,15 +109,14 @@ Construcción:
 - Sistema constructivo tradicional de ladrillo y cemento.
 
 Áreas:
-- Área total: 60 m².
-- Área construida: 60 m².
-- Primer piso: 33 m².
-- Segundo piso: 27 m².
+- Área total del lote: 60 m².
+- Área construida: 70 m² entre el primer y segundo piso.
 
 Facilidades económicas:
 - Inicial: S/ 5,000.
-- Bono de Techo Propio: S/ 62,700.
+- Bono Techo Propio: S/ 62,700.
 - Financiamiento: 48 meses sin intereses.
+- Cuotas desde S/ 938.
 
 Servicios básicos:
 - Luz.
@@ -978,6 +977,7 @@ INFORMACIÓN FINANCIERA CONFIRMADA:
 - Inicial: S/ 5,000.
 - Bono Techo Propio: S/ 62,700.
 - Financiamiento: hasta 48 meses sin intereses.
+- Cuotas desde S/ 938.
 
 UBICACIÓN:
 - Puerto Real está ubicado en Pimentel, Chiclayo.
@@ -1191,8 +1191,22 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
         ]):
 
             respuesta_texto = (
-                "La inicial es de S/ 5,000 😊 Además, contamos con Bono Techo Propio "
-                "de S/ 62,700 y financiamiento hasta 48 meses sin intereses."
+            "La inicial es de S/ 5,000 😊 Además, contamos con Bono Techo Propio "
+            "de S/ 62,700, cuotas desde S/ 938 y financiamiento hasta 48 meses sin intereses."
+        )
+
+        elif any(p in texto_normalizado for p in [
+            "cuanto es la cuota",
+            "cuánto es la cuota",
+            "cuanto son las cuotas",
+            "cuánto son las cuotas",
+            "de cuanto es la cuota",
+            "de cuánto es la cuota",
+            "cuotas",
+        ]):
+            respuesta_texto = (
+                "Son 48 cuotas de S/ 938 mensuales 😊 "
+                "¿Podrías manejar ese monto de cuota mensual?"
             )
         else:
             print("ENVIANDO MENSAJE A OPENAI...")
