@@ -982,7 +982,7 @@ INFORMACIÓN FINANCIERA CONFIRMADA:
 UBICACIÓN:
 - Puerto Real está ubicado en Pimentel, Chiclayo.
 - Si el cliente pregunta dónde queda el proyecto, dónde está ubicado o pide la ubicación, responde de forma breve y clara:
-  "Puerto Real está ubicado en Pimentel, Chiclayo 😊📍"
+  "😊📍Puerto Real está ubicado en Pimentel, Chiclayo"
 - Si pregunta por varias ubicaciones, zonas o proyectos, no inventes otras ubicaciones; ofrece que un asesor comercial lo detalle.
 
 CONTEXTO DEL PROYECTO:
