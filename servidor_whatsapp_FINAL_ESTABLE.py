@@ -25,7 +25,7 @@ TOKEN_VERIFICACION = "puerto_real_2026"
 
 ARCHIVO_EXCEL = "clientes_puerto_real.xlsx"
 
-GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyGLzDbAeV4D0-cS6stZRwRY49oGNsvmG38Wqw13ySTdH1UzsN90bjzlB1KU8Tb1vNs/exec"
+GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbzMSUCODNw21Jsv4cUiBpZosSBIRbHFQThC-JipvhJ1r6ok1So0cde7D4GbuFx6r4Jp/exec"
 
 # ==========================================
 # MEMORIA DE CONVERSACIONES
