@@ -1158,7 +1158,7 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
             respuesta_texto = (
                 "El Bono Techo Propio para Puerto Real es de S/ 62,700 😊"
             )
-            
+
         # PRECIO / BONO / FINANCIAMIENTO
         elif any(p in texto_normalizado for p in [
             "precio",
