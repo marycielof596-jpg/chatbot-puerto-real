@@ -1077,7 +1077,10 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
                 r"hola,\s*soy\s+([^.\n]+)",
                 texto_conversacion,
                 re.IGNORECASE
-            )
+        )
+
+        if coincidencia_nombre:
+            nombre_desde_landing = coincidencia_nombre.group(1).strip()
 
         if coincidencia_nombre:
             nombre_desde_landing = coincidencia_nombre.group(1).strip()
