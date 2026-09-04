@@ -1148,6 +1148,17 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
                 "realice la evaluación 😊 ¿Me indicas tu nombre para registrar tu solicitud?"
             )
 
+        elif any(p in texto_normalizado for p in [
+            "de cuanto es el bono",
+            "de cuánto es el bono",
+            "cuanto es el bono",
+            "cuánto es el bono",
+            "monto del bono",
+        ]):
+            respuesta_texto = (
+                "El Bono Techo Propio para Puerto Real es de S/ 62,700 😊"
+            )
+            
         # PRECIO / BONO / FINANCIAMIENTO
         elif any(p in texto_normalizado for p in [
             "precio",
