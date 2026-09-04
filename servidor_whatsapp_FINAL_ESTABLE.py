@@ -1038,6 +1038,14 @@ PRECIO Y FACILIDADES:
   "La inicial es de S/ 5,000 😊 Además, contamos con Bono Techo Propio de S/ 62,700 y financiamiento hasta 48 meses sin intereses."
 - Si pregunta por un precio final exacto que no está confirmado en la base de conocimiento, indica brevemente que un asesor comercial puede confirmarlo.
 
+EVITAR REPETICIONES:
+- Revisa siempre el historial antes de responder.
+- No repitas información que ya explicaste anteriormente.
+- Si el cliente responde "sí", "sí por favor", "claro", "ok" o algo similar, interpreta esa respuesta según la pregunta anterior.
+- Si ya explicaste las características de la vivienda, no las vuelvas a repetir salvo que el cliente las pida nuevamente.
+- Si el cliente dice algo general como "quiero conocer el proyecto", guía la conversación hacia un tema que todavía no se haya explicado.
+- Puedes ofrecer como siguiente paso: ubicación, facilidades de compra, Bono Techo Propio o atención con asesor.
+
 MUY IMPORTANTE:
 - NO inventes precios, disponibilidad, promociones, requisitos, fórmulas ni fechas.
 - NO calcules cuotas sin información suficiente.
@@ -1082,6 +1090,19 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
             respuesta_texto = (
                 "¡Claro! 😊 Te ayudo con Puerto Real 🏡 "
                 "¿Qué te gustaría conocer: ubicación, características de la casa o facilidades de compra?"
+            )
+
+        elif any(p in texto_normalizado for p in [
+            "quiero conocer el proyecto",
+            "quiero saber del proyecto",
+            "quiero conocer mas",
+            "quiero conocer más",
+            "quiero saber mas",
+            "quiero saber más",
+        ]):
+            respuesta_texto = (
+                "¡Claro! 😊 Puedo ayudarte con ubicación, características de la vivienda, "
+                "facilidades de compra o Bono Techo Propio. ¿Qué te gustaría conocer primero?"
             )
 
         elif any(p in texto_normalizado for p in [
@@ -1168,6 +1189,7 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
             "bono",
             "financiamiento",
         ]):
+
             respuesta_texto = (
                 "La inicial es de S/ 5,000 😊 Además, contamos con Bono Techo Propio "
                 "de S/ 62,700 y financiamiento hasta 48 meses sin intereses."
