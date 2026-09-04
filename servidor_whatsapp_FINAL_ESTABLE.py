@@ -2,6 +2,7 @@ from flask import Flask, request
 from openpyxl import load_workbook, Workbook
 from datetime import datetime
 from zoneinfo import ZoneInfo
+
 import requests
 import os
 import threading
@@ -1067,6 +1068,20 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
     try:
         texto_normalizado = texto.lower().strip()
 
+        cliente_desde_landing = "vengo de la página de puerto real" in texto_conversacion.lower()
+
+        nombre_desde_landing = ""
+
+        if cliente_desde_landing:
+            coincidencia_nombre = re.search(
+                r"hola,\s*soy\s+([^.\n]+)",
+                texto_conversacion,
+                re.IGNORECASE
+            )
+
+        if coincidencia_nombre:
+            nombre_desde_landing = coincidencia_nombre.group(1).strip()
+
         if texto_normalizado in [
             "hola",
             "holaa",
@@ -1152,7 +1167,7 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
                 "¡Claro! 😊 Te muestro el diseño de la vivienda de Puerto Real 🏡"
             )
 
-                # CALIFICACIÓN AL BONO -> DERIVAR A ASESOR
+            # CALIFICACIÓN AL BONO -> DERIVAR A ASESOR
         elif any(p in texto_normalizado for p in [
             "califico",
             "calificar",
@@ -1165,11 +1180,18 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
             "me pueden evaluar",
             "evaluar para el bono",
         ]):
-            respuesta_texto = (
-                "Para saber si calificas al Bono Techo Propio es necesario que un asesor comercial "
-                "realice la evaluación 😊 ¿Me indicas tu nombre para registrar tu solicitud?"
-            )
-
+            if cliente_desde_landing and nombre_desde_landing:
+                respuesta_texto = (
+                    f"Perfecto, {nombre_desde_landing} 😊 "
+                    "Ya tengo tus datos registrados. Un asesor comercial podrá brindarte toda la información "
+                    "y orientarte sobre el Bono Techo Propio."
+                )
+            else:
+                respuesta_texto = (
+                    "Para saber si calificas al Bono Techo Propio es necesario que un asesor comercial "
+                    "realice la evaluación 😊 ¿Me indicas tu nombre para que un asesor pueda brindarte toda la información?"
+                )
+                
         elif any(p in texto_normalizado for p in [
             "de cuanto es el bono",
             "de cuánto es el bono",
