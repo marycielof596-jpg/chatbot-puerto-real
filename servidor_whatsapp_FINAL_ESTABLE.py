@@ -1071,13 +1071,14 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
         cliente_desde_landing = "vengo de la página de puerto real" in texto_conversacion.lower()
 
         nombre_desde_landing = ""
+        coincidencia_nombre = None
 
         if cliente_desde_landing:
             coincidencia_nombre = re.search(
                 r"hola,\s*soy\s+([^.\n]+)",
                 texto_conversacion,
                 re.IGNORECASE
-        )
+            )
 
         if coincidencia_nombre:
             nombre_desde_landing = coincidencia_nombre.group(1).strip()
