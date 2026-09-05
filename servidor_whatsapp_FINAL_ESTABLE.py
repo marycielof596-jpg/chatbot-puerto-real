@@ -1171,7 +1171,7 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
                 "¡Claro! 😊 Te muestro el diseño de la vivienda de Puerto Real 🏡"
             )
 
-            # CALIFICACIÓN AL BONO -> DERIVAR A ASESOR
+        # CALIFICACIÓN AL BONO -> DERIVAR A ASESOR
         elif any(p in texto_normalizado for p in [
             "califico",
             "calificar",
@@ -1184,11 +1184,10 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
             "me pueden evaluar",
             "evaluar para el bono",
         ]):
-            if cliente_desde_landing and nombre_desde_landing:
+            if cliente_desde_landing:
                 respuesta_texto = (
-                    f"Perfecto, {nombre_desde_landing} 😊 "
-                    "Ya tengo tus datos registrados. Un asesor comercial podrá brindarte toda la información "
-                    "y orientarte sobre el Bono Techo Propio."
+                    "Para saber si calificas al Bono Techo Propio es necesario que un asesor comercial "
+                    "realice la evaluación 😊 ¿De qué ciudad nos escribes?"
                 )
             else:
                 respuesta_texto = (
