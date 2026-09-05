@@ -1187,12 +1187,12 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
             if cliente_desde_landing:
                 respuesta_texto = (
                     "Para saber si calificas al Bono Techo Propio es necesario que un asesor comercial "
-                    "realice la evaluación 😊 ¿De qué ciudad nos escribes?"
+                    "realice la evaluación 😊 Antes de derivarte, ¿de qué ciudad nos escribes?"
                 )
             else:
                 respuesta_texto = (
                     "Para saber si calificas al Bono Techo Propio es necesario que un asesor comercial "
-                    "realice la evaluación 😊 ¿Me indicas tu nombre para que un asesor pueda brindarte toda la información?"
+                    "realice la evaluación 😊 ¿Me indicas tu nombre?"
                 )
                 
         elif any(p in texto_normalizado for p in [
