@@ -130,6 +130,52 @@ Entrega:
 """
 
 
+def obtener_telefono_real(valor):
+    """Devuelve un celular peruano válido (9 dígitos) o cadena vacía."""
+    if valor is None:
+        return ""
+
+    digitos = re.sub(r"\D", "", str(valor))
+    if len(digitos) == 11 and digitos.startswith("51") and digitos[2] == "9":
+        digitos = digitos[2:]
+
+    return digitos if re.fullmatch(r"9\d{8}", digitos) else ""
+
+
+def extraer_telefono_de_texto(texto):
+    """Extrae un celular compartido por el cliente, sin usar IDs de WhatsApp."""
+    if not texto:
+        return ""
+
+    mensaje = str(texto).strip()
+    solo_digitos = re.sub(r"[\s()+.-]", "", mensaje)
+
+    # Acepta cuando el cliente envía el celular como mensaje independiente.
+    if re.fullmatch(r"(?:51)?9\d{8}", solo_digitos):
+        return obtener_telefono_real(solo_digitos)
+
+    # En mensajes largos, solo extrae números cuando el cliente indica que son suyos.
+    contexto_numero_propio = re.search(
+        r"\b(mi (?:n[uú]mero|celular|tel[eé]fono|whatsapp)|mi n[uú]mero es|"
+        r"puedes llamarme|ll[aá]mame|cont[aá]ctame|contactarme al)\b",
+        mensaje,
+        flags=re.IGNORECASE,
+    )
+    if not contexto_numero_propio:
+        return ""
+
+    coincidencias = re.findall(
+        r"(?<!\d)(?:\+?51[\s-]?)?9(?:[\s-]?\d){8}(?!\d)",
+        mensaje,
+    )
+    for coincidencia in coincidencias:
+        telefono = obtener_telefono_real(coincidencia)
+        if telefono:
+            return telefono
+
+    return ""
+
+
 # ==========================================
 # EXCEL
 # ==========================================
@@ -561,6 +607,14 @@ def recibir_mensaje():
         or contacto.get("user_id")
     )
 
+    # Guardar aparte el celular solo si Meta realmente lo entrega como número.
+    # No modificar "numero": puede ser el identificador necesario para responder.
+    telefono_real_contacto = (
+        obtener_telefono_real(contacto.get("wa_id"))
+        or obtener_telefono_real(contacto.get("phone_number"))
+        or obtener_telefono_real(mensaje.get("from"))
+    )
+
     if not numero:
         return "EVENT_RECEIVED", 200
 
@@ -612,6 +666,7 @@ def recibir_mensaje():
             mensaje_id,
             id_whatsapp,
             username,
+            telefono_real_contacto,
         ),
         daemon=True,
     )
@@ -906,6 +961,7 @@ def procesar_mensaje_cliente(
     mensaje_id,
     id_whatsapp,
     username,
+    telefono_real_contacto=None,
 ):
     print("ENTRÓ A procesar_mensaje_cliente")
 
@@ -916,6 +972,23 @@ def procesar_mensaje_cliente(
         "role": "user",
         "content": texto,
     })
+
+    # Obtener un celular real sin confundirlo con el identificador PE... de Meta.
+    telefono_real_cliente = (
+        obtener_telefono_real(telefono_real_contacto)
+        or obtener_telefono_real(numero)
+    )
+    if not telefono_real_cliente:
+        for mensaje_historial in reversed(historiales[numero]):
+            if mensaje_historial.get("role") == "user":
+                telefono_en_mensaje = extraer_telefono_de_texto(
+                    mensaje_historial.get("content", "")
+                )
+                if telefono_en_mensaje:
+                    telefono_real_cliente = telefono_en_mensaje
+                    break
+
+    telefono_real_disponible = bool(telefono_real_cliente)
 
     texto_conversacion = ""
     for mensaje_historial in historiales[numero]:
@@ -956,17 +1029,22 @@ NOMBRE DEL CLIENTE:
 - Úsalo de manera natural de vez en cuando.
 - Si todavía no sabes su nombre y solicita hablar con un asesor, pregunta únicamente su nombre.
 
-WHATSAPP:
-- El sistema obtiene automáticamente el número o identificador de WhatsApp.
-- NUNCA le pidas al cliente su número de celular.
+TELÉFONO DE CONTACTO:
+- El identificador de WhatsApp puede ser un ID y no un número de celular.
+- Nunca inventes ni deduzcas un celular a partir del identificador.
+- TELÉFONO REAL DISPONIBLE PARA EL EQUIPO COMERCIAL: {"Sí" if telefono_real_disponible else "No"}.
+- Si el cliente pide que lo llamen o solicita contacto de un asesor y no hay teléfono real disponible, pídele amablemente que comparta su número de celular para poder llamarlo.
+- Si el cliente ya compartió su celular en la conversación, no vuelvas a pedírselo.
+- Haz solo una pregunta por mensaje.
 
 ASESOR HUMANO:
 Si el cliente quiere hablar con un asesor, ser contactado, comprar, separar, cotizar, visitar o avanzar:
 1. Reconoce su intención.
 2. No repitas toda la información del proyecto.
 3. Si no sabes su nombre, pregunta únicamente su nombre.
-4. Si ya sabes su nombre pero no su horario, pregunta únicamente el horario.
-5. Si ya tienes nombre y horario, indica únicamente que la solicitud quedó registrada para el equipo comercial.
+4. Si no hay teléfono real disponible, pide su número de celular.
+5. Si ya sabes su nombre y tienes teléfono, pero no su horario, pregunta únicamente el horario.
+6. Si ya tienes nombre, teléfono real y horario, indica únicamente que la solicitud quedó registrada para el equipo comercial.
 - No digas que ya agendaste, coordinaste o hablaste con un asesor.
 
 BONO TECHO PROPIO:
@@ -1271,17 +1349,9 @@ Responde específicamente al MENSAJE ACTUAL DEL CLIENTE teniendo en cuenta el hi
         datos_extraidos = extraer_datos_cliente(numero)
         datos_cliente = convertir_datos_cliente(datos_extraidos)
 
-        telefono_detectado = re.search(
-            r"\b(?:51)?9\d{8}\b",
-            texto.replace(" ", ""),
-        )
-        whatsapp_para_excel = numero
-
-        if telefono_detectado:
-            telefono_real = telefono_detectado.group()
-            if telefono_real.startswith("51"):
-                telefono_real = telefono_real[2:]
-            whatsapp_para_excel = telefono_real
+        # La columna WhatsApp contiene solo un celular real o queda vacía.
+        # El ID (incluido PE...) se conserva por separado en id_whatsapp.
+        whatsapp_para_excel = telefono_real_cliente or ""
 
         guardar_cliente_excel(
             datos_cliente["Nombre"],
