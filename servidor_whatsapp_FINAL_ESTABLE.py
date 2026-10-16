@@ -1,128 +1,95 @@
-        ]):
-            respuesta_texto = (
-                "Son 48 cuotas de S/ 938 mensuales 😊 "
-                "¿Podrías manejar ese monto de cuota mensual?"
-            )
-        else:
-            print("ENVIANDO MENSAJE A OPENAI...")
+from flask import Flask, request
+from openpyxl import load_workbook, Workbook
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
-            respuesta_texto = llamar_openai_responses(
-                instructions=instructions,
-                input_text=input_actual,
-                max_output_tokens=220,
-            )
+import requests
+import os
+import threading
+import queue
+import time
+import re
 
-            print("OPENAI RESPONDIÓ")
 
-    except Exception as error:
-        print("ERROR DE OPENAI:", error)
-        respuesta_texto = (
-            "Disculpa, en este momento estoy teniendo una demora para responder. "
-            "Puedes intentar nuevamente en unos segundos 😊"
-        )
+# ==========================================
+# CONFIGURACIÓN
+# ==========================================
 
-    historiales[numero].append({
-        "role": "assistant",
-        "content": respuesta_texto,
-    })
+app = Flask(__name__)
 
-    # Primero enviamos el texto para que la conversación se sienta natural.
-    enviar_texto_whatsapp(numero, respuesta_texto)
+PHONE_NUMBER_ID = "1248995224968397"
 
-    # Después, si corresponde, enviamos UNA de las dos imágenes.
-    imagen = detectar_imagen_para_mensaje(texto)
-    if imagen:
-        url_imagen, descripcion = imagen
-        enviar_imagen_whatsapp(numero, url_imagen, descripcion)
+IMAGEN_UBICACION = "PIMENTEL.jpg"
 
-    # CRM: un error aquí nunca debe impedir responder al cliente.
+IMAGEN_CASA = "CASA PUERTO REAL 2026.jpeg"
+
+TOKEN_VERIFICACION = "puerto_real_2026"
+
+ARCHIVO_EXCEL = "clientes_puerto_real.xlsx"
+
+GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbzMSUCODNw21Jsv4cUiBpZosSBIRbHFQThC-JipvhJ1r6ok1So0cde7D4GbuFx6r4Jp/exec"
+
+# ==========================================
+# MEMORIA DE CONVERSACIONES
+# ==========================================
+
+historiales = {}
+
+
+# ==========================================
+# CONTROL DE DUPLICADOS Y COLA DE TRABAJO
+# ==========================================
+
+ARCHIVO_MENSAJES_PROCESADOS = "mensajes_procesados.txt"
+
+mensajes_procesados = set()
+lock_mensajes = threading.Lock()
+cola_mensajes = queue.Queue()
+ultimo_mensaje_por_numero = {}
+
+ultimos_mensajes_por_cliente = {}
+VENTANA_DUPLICADO_SEGUNDOS = 12
+
+
+def cargar_mensajes_procesados():
+    if not os.path.exists(ARCHIVO_MENSAJES_PROCESADOS):
+        return
+
     try:
-        datos_extraidos = extraer_datos_cliente(numero)
-        datos_cliente = convertir_datos_cliente(datos_extraidos)
-
-        # La columna WhatsApp contiene solo un celular real o queda vacía.
-        # El ID (incluido PE...) se conserva por separado en id_whatsapp.
-        whatsapp_para_excel = telefono_real_cliente or ""
-
-        guardar_cliente_excel(
-            datos_cliente["Nombre"],
-            whatsapp_para_excel,
-            id_whatsapp,
-            username,
-            datos_cliente["Motivo de compra"],
-            datos_cliente["Número de personas"],
-            datos_cliente["Inicial"],
-            datos_cliente["Bono"],
-            datos_cliente["Ubicación"],
-            datos_cliente["Financiamiento"],
-            datos_cliente["Solicitud de asesor"],
-            datos_cliente["Horario de contacto"],
-            datos_cliente["Nivel del lead"],
-            datos_cliente["Resumen"],
-        )
-
-        guardar_cliente_google_sheets(
-    datos_cliente["Nombre"],
-    whatsapp_para_excel,
-    id_whatsapp,
-    username,
-    datos_cliente["Motivo de compra"],
-    datos_cliente["Número de personas"],
-    datos_cliente["Inicial"],
-    datos_cliente["Bono"],
-    datos_cliente["Ubicación"],
-    datos_cliente["Financiamiento"],
-    datos_cliente["Solicitud de asesor"],
-    datos_cliente["Horario de contacto"],
-    datos_cliente["Nivel del lead"],
-    datos_cliente["Resumen"],
-)
-        print("CLIENTE PROCESADO EN CRM")
+        with open(ARCHIVO_MENSAJES_PROCESADOS, "r", encoding="utf-8") as archivo:
+            for linea in archivo:
+                mensaje_id = linea.strip()
+                if mensaje_id:
+                    mensajes_procesados.add(mensaje_id)
     except Exception as error:
-        print("ERROR GUARDANDO CLIENTE:", error)
-
-    print("RESPUESTA FINAL:", respuesta_texto)
+        print("No se pudo cargar mensajes procesados:", error)
 
 
-# ==========================================
-# TRABAJADOR DE LA COLA
-# ==========================================
+def registrar_mensaje_procesado(mensaje_id):
+    if not mensaje_id:
+        return True
 
+    with lock_mensajes:
+        if mensaje_id in mensajes_procesados:
+            return False
 
-def trabajador_mensajes():
-    while True:
-        numero, texto, mensaje_id, id_whatsapp, username = cola_mensajes.get()
+        mensajes_procesados.add(mensaje_id)
 
         try:
-            procesar_mensaje_cliente(
-                numero,
-                texto,
-                mensaje_id,
-                id_whatsapp,
-                username,
-            )
+            with open(ARCHIVO_MENSAJES_PROCESADOS, "a", encoding="utf-8") as archivo:
+                archivo.write(mensaje_id + "\n")
         except Exception as error:
-            print("ERROR PROCESANDO MENSAJE:", error)
-        finally:
-            cola_mensajes.task_done()
+            print("No se pudo guardar el ID del mensaje:", error)
+
+    return True
 
 
 # ==========================================
-# INICIAR TRABAJADOR
+# INFORMACIÓN DE PUERTO REAL
 # ==========================================
 
-preparar_excel()
-cargar_mensajes_procesados()
+informacion_puerto_real = """
+PROYECTO: PUERTO REAL
 
-
-# ==========================================
-# INICIAR SERVIDOR LOCAL
-# ==========================================
-
-if __name__ == "__main__":
-
-    port = int(os.environ.get("PORT", 5001))
-
-    app.run(
-        host="0.0.0.0",
-        port=port,
+Ubicación:
+Pimentel, Chiclayo.
