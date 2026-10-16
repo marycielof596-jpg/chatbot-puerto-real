@@ -867,13 +867,15 @@ No hagas una pregunta por costumbre. Pregunta solamente cuando ayude a continuar
 # ==========================================
 
 
-
 def trabajador_mensajes():
+    print("TRABAJADOR ACTIVO: esperando mensajes", flush=True)
+
     while True:
         numero, texto, mensaje_id, id_whatsapp, username = cola_mensajes.get()
-        print("DIAGNOSTICO: trabajador tomó el mensaje de la cola")
+        print(f"TRABAJADOR RECIBIÓ: {numero} | {texto}", flush=True)
 
         try:
+            print("INICIANDO PROCESAMIENTO", flush=True)
             procesar_mensaje_cliente(
                 numero,
                 texto,
@@ -881,30 +883,30 @@ def trabajador_mensajes():
                 id_whatsapp,
                 username,
             )
+            print("PROCESAMIENTO TERMINADO", flush=True)
         except Exception as error:
-            print("ERROR PROCESANDO MENSAJE:", repr(error))
+            import traceback
+            print("ERROR PROCESANDO MENSAJE:", repr(error), flush=True)
+            traceback.print_exc()
         finally:
             cola_mensajes.task_done()
 
 
 # ==========================================
-# INICIAR SERVIDOR
+# INICIALIZACIÓN COMPATIBLE CON RENDER/GUNICORN
 # ==========================================
+# Render inicia esta app con Gunicorn, por lo que __main__ no se ejecuta.
+# El trabajador debe arrancar al importar el módulo para procesar la cola.
 
-
-# IMPORTANTE: Render ejecuta esta aplicación mediante Gunicorn.
-# Por eso la inicialización debe ocurrir al importar el módulo, no solo
-# dentro de if __name__ == "__main__", que Gunicorn no ejecuta.
 preparar_excel()
 cargar_mensajes_procesados()
 
 hilo_trabajador = threading.Thread(
     target=trabajador_mensajes,
     daemon=True,
-    name="trabajador-mensajes",
+    name="trabajador-whatsapp",
 )
 hilo_trabajador.start()
-print("TRABAJADOR DE MENSAJES INICIADO (Gunicorn)")
 
 if __name__ == "__main__":
     app.run(
