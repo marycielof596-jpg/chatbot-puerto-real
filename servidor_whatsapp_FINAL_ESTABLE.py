@@ -886,23 +886,25 @@ def trabajador_mensajes():
 
 
 # ==========================================
-# INICIAR SERVIDOR
+# INICIALIZACIÓN COMPATIBLE CON RENDER/GUNICORN
 # ==========================================
+# Render inicia esta app con Gunicorn, por lo que __main__ no se ejecuta.
+# El trabajador debe arrancar al importar el módulo para procesar la cola.
 
+preparar_excel()
+cargar_mensajes_procesados()
+
+hilo_trabajador = threading.Thread(
+    target=trabajador_mensajes,
+    daemon=True,
+    name="trabajador-whatsapp",
+)
+hilo_trabajador.start()
 
 if __name__ == "__main__":
-    preparar_excel()
-    cargar_mensajes_procesados()
-
-    hilo_trabajador = threading.Thread(
-        target=trabajador_mensajes,
-        daemon=True,
-    )
-    hilo_trabajador.start()
-
     app.run(
-        port=5001,
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", "5001")),
         debug=False,
         threaded=True,
     )
-    
