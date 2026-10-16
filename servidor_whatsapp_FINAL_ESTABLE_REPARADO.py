@@ -867,9 +867,11 @@ No hagas una pregunta por costumbre. Pregunta solamente cuando ayude a continuar
 # ==========================================
 
 
+
 def trabajador_mensajes():
     while True:
         numero, texto, mensaje_id, id_whatsapp, username = cola_mensajes.get()
+        print("DIAGNOSTICO: trabajador tomó el mensaje de la cola")
 
         try:
             procesar_mensaje_cliente(
@@ -880,7 +882,7 @@ def trabajador_mensajes():
                 username,
             )
         except Exception as error:
-            print("ERROR PROCESANDO MENSAJE:", error)
+            print("ERROR PROCESANDO MENSAJE:", repr(error))
         finally:
             cola_mensajes.task_done()
 
